@@ -5,21 +5,124 @@ output:
     keep_md: true
 ---
 
+```{r initialize, echo=FALSE}
+rm(list = ls(all.names = T))  # clear the environment
+library(lattice)  # load lattice library. required for last question
+```
+
 
 ## Loading and preprocessing the data
+```{r, echo=TRUE}
+
+if (!file.exists("activity.csv"))
+    unzip("activity.zip")
 
 
+activity <- read.csv(file = "activity.csv", header = TRUE, stringsAsFactors = FALSE, na.strings = "NA")
+activity$date <- as.Date(activity$date)
+
+```
 
 ## What is mean total number of steps taken per day?
+```{r, echo=TRUE}
+totalStepsPerDay <- tapply(activity$steps, activity$date, sum, na.rm = TRUE)
+hist(totalStepsPerDay, main = "Histogram of Total Steps per Day")
+```
+  
+Mean Steps per Day:
+```{r, echo=TRUE}
+meanStepsPerDay <- tapply(activity$steps, activity$date, mean, na.rm = TRUE)
+meanStepsPerDay
+```
+  
+Median Steps per Day:
+```{r, echo=TRUE}
+medianStepsPerDay <- tapply(activity$steps, activity$date, median, na.rm = TRUE)
+medianStepsPerDay
 
-
+```
 
 ## What is the average daily activity pattern?
+```{r, echo=TRUE}
 
+averageNumberOfStepsAcrossDays <- tapply(activity$steps, activity$interval, mean, na.rm = TRUE)
+intervals <- unique(activity$interval)
+plot(x = intervals, y = averageNumberOfStepsAcrossDays, type = "l")
+intervalIndex <- which.max(averageNumberOfStepsAcrossDays)
+intervalValue <- intervals[intervalIndex]
+```
 
+The 5-minute interval with the highest number of steps is: `r intervalValue`.  
+This interval has `r averageNumberOfStepsAcrossDays[intervalIndex]` steps on average.  
 
 ## Imputing missing values
 
+```{r, echo=TRUE}
+numRowsWithNAs <- sum(is.na(activity$steps) | is.na(activity$date) | is.na(activity$interval))
+```
+Number of rows with NAs is: `r numRowsWithNAs`.  
+  
+The strategy for filling in all of the missing values in the dataset. Using the mean for the equivalent 5-minute interval.
+```{r, echo=TRUE}
+newActivity <- activity
 
+for (i in nrow(newActivity)) {
+  if (is.na(newActivity$steps[i])) {  # Has missing value
+    idx <- which(as.integer(row.names(averageNumberOfStepsAcrossDays)) == newActivity$interval[i])  # Find the mean for the same interval
+    newActivity$steps[i] <- averageNumberOfStepsAcrossDays[idx] # Impute
+  }
+  
+}
+
+totalStepsPerDay2 <- tapply(newActivity$steps, newActivity$date, sum, na.rm = TRUE)
+hist(totalStepsPerDay2, main = "Histogram of Total Steps per Day (with Imputation)")
+```
+  
+Mean Steps per Day (with Imputation):
+```{r, echo=TRUE}
+meanStepsPerDay2 <- tapply(newActivity$steps, newActivity$date, mean, na.rm = TRUE)
+meanStepsPerDay2
+```
+  
+Median Steps per Day (with Imputation):
+```{r, echo=TRUE}
+medianStepsPerDay2 <- tapply(newActivity$steps, newActivity$date, median, na.rm = TRUE)
+medianStepsPerDay2
+```
+
+
+Do these values differ from the estimates from the first part of the assignment?  
+Means Differ? `r all.equal(meanStepsPerDay, meanStepsPerDay2)`  
+Medians Differ? `r all.equal(medianStepsPerDay, medianStepsPerDay2)`  
+
+Impact?  
+It makes the estimates of total steps per day greater or equal to without imputing `r all(totalStepsPerDay2 - totalStepsPerDay >= 0)` 
+In addition the means and medians in the for sets with imputation has less number of NAs  
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+```{r, echo=TRUE}
+newActivity$weekend <- weekdays(newActivity$date) == "Saturday" | weekdays(newActivity$date) == "Sunday"
+newActivity$weekend <- factor(newActivity$weekend, levels = c(FALSE, TRUE), labels = c("weekday", "weekend"))
+
+newActivitySplit <- split(newActivity, newActivity$weekend)
+
+weekdaysAverages <- tapply(newActivitySplit$weekday$steps, newActivitySplit$weekday$interval, mean, na.rm = T)
+weekdaysAveragesDS <- data.frame(interval = as.integer(row.names(weekdaysAverages)),
+                               steps = weekdaysAverages,
+                               weekend = F)
+
+weekendAverages <- tapply(newActivitySplit$weekend$steps, newActivitySplit$weekend$interval, mean, na.rm = T)
+weekendAveragesDS <- data.frame(interval = as.integer(row.names(weekendAverages)),
+                               steps = weekendAverages,
+                               weekend = T)
+
+# recombine averages into a single dataset
+fullWeekAverages <- rbind(weekdaysAveragesDS, weekendAveragesDS)
+fullWeekAverages$weekend <- factor(fullWeekAverages$weekend, levels = c(FALSE, TRUE), labels = c("weekday", "weekend"))
+
+attach(fullWeekAverages)
+xyplot(steps ~ interval | weekend, type = "l", layout=c(1, 2))
+```
+
+From the above chart we can easily notice that there are differences between the average steps during weekdays and weekends
