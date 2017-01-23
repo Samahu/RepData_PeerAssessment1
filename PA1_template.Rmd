@@ -25,17 +25,22 @@ activity$date <- as.Date(activity$date)
 
 ## What is mean total number of steps taken per day?
 ```{r, echo=TRUE}
-totalStepsPerDay <- tapply(activity$steps, activity$date, sum, na.rm = TRUE)
+totalStepsPerDay <- tapply(activity$steps, activity$date, sum)
 hist(totalStepsPerDay, main = "Histogram of Total Steps per Day")
 ```
   
-Mean Steps per Day:
+Mean and Median of totalStepsPerDay:
+```{r, echo=TRUE}
+summary(totalStepsPerDay)
+```
+
+Mean Steps per Individual Day:
 ```{r, echo=TRUE}
 meanStepsPerDay <- tapply(activity$steps, activity$date, mean, na.rm = TRUE)
 meanStepsPerDay
 ```
   
-Median Steps per Day:
+Median Steps per Individual Day:
 ```{r, echo=TRUE}
 medianStepsPerDay <- tapply(activity$steps, activity$date, median, na.rm = TRUE)
 medianStepsPerDay
@@ -78,13 +83,18 @@ totalStepsPerDay2 <- tapply(newActivity$steps, newActivity$date, sum, na.rm = TR
 hist(totalStepsPerDay2, main = "Histogram of Total Steps per Day (with Imputation)")
 ```
   
-Mean Steps per Day (with Imputation):
+Mean and Median of totalStepsPerDay (with Imputation):
+```{r, echo=TRUE}
+summary(totalStepsPerDay2)
+```
+
+Mean Steps per Individual Day (with Imputation):
 ```{r, echo=TRUE}
 meanStepsPerDay2 <- tapply(newActivity$steps, newActivity$date, mean, na.rm = TRUE)
 meanStepsPerDay2
 ```
   
-Median Steps per Day (with Imputation):
+Median Steps per Individual Day (with Imputation):
 ```{r, echo=TRUE}
 medianStepsPerDay2 <- tapply(newActivity$steps, newActivity$date, median, na.rm = TRUE)
 medianStepsPerDay2

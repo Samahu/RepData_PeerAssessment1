@@ -17,13 +17,24 @@ activity$date <- as.Date(activity$date)
 ## What is mean total number of steps taken per day?
 
 ```r
-totalStepsPerDay <- tapply(activity$steps, activity$date, sum, na.rm = TRUE)
+totalStepsPerDay <- tapply(activity$steps, activity$date, sum)
 hist(totalStepsPerDay, main = "Histogram of Total Steps per Day")
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-2-1.png)<!-- -->
   
-Mean Steps per Day:
+Mean and Median of totalStepsPerDay:
+
+```r
+summary(totalStepsPerDay)
+```
+
+```
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+##      41    8841   10760   10770   13290   21190       8
+```
+
+Mean Steps per Individual Day:
 
 ```r
 meanStepsPerDay <- tapply(activity$steps, activity$date, mean, na.rm = TRUE)
@@ -55,7 +66,7 @@ meanStepsPerDay
 ##        NaN
 ```
   
-Median Steps per Day:
+Median Steps per Individual Day:
 
 ```r
 medianStepsPerDay <- tapply(activity$steps, activity$date, median, na.rm = TRUE)
@@ -95,7 +106,7 @@ intervals <- unique(activity$interval)
 plot(x = intervals, y = averageNumberOfStepsAcrossDays, type = "l")
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
+![](PA1_template_files/figure-html/unnamed-chunk-6-1.png)<!-- -->
 
 ```r
 intervalIndex <- which.max(averageNumberOfStepsAcrossDays)
@@ -130,9 +141,20 @@ totalStepsPerDay2 <- tapply(newActivity$steps, newActivity$date, sum, na.rm = TR
 hist(totalStepsPerDay2, main = "Histogram of Total Steps per Day (with Imputation)")
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
+![](PA1_template_files/figure-html/unnamed-chunk-8-1.png)<!-- -->
   
-Mean Steps per Day (with Imputation):
+Mean and Median of totalStepsPerDay (with Imputation):
+
+```r
+summary(totalStepsPerDay2)
+```
+
+```
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##       0    6778   10400    9354   12810   21190
+```
+
+Mean Steps per Individual Day (with Imputation):
 
 ```r
 meanStepsPerDay2 <- tapply(newActivity$steps, newActivity$date, mean, na.rm = TRUE)
@@ -164,7 +186,7 @@ meanStepsPerDay2
 ##  1.0754717
 ```
   
-Median Steps per Day (with Imputation):
+Median Steps per Individual Day (with Imputation):
 
 ```r
 medianStepsPerDay2 <- tapply(newActivity$steps, newActivity$date, median, na.rm = TRUE)
@@ -202,7 +224,7 @@ Means Differ? 'is.NA' value mismatch: 7 in current 8 in target
 Medians Differ? 'is.NA' value mismatch: 7 in current 8 in target  
 
 Impact?  
-It makes the estimates of total steps per day greater or equal to without imputing TRUE 
+It makes the estimates of total steps per day greater or equal to without imputing NA 
 In addition the means and medians in the for sets with imputation has less number of NAs  
 
 ## Are there differences in activity patterns between weekdays and weekends?
@@ -232,6 +254,6 @@ attach(fullWeekAverages)
 xyplot(steps ~ interval | weekend, type = "l", layout=c(1, 2))
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-10-1.png)<!-- -->
+![](PA1_template_files/figure-html/unnamed-chunk-12-1.png)<!-- -->
 
 From the above chart we can easily notice that there are differences between the average steps during weekdays and weekends
